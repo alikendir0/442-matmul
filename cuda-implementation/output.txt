@@ -1,0 +1,37 @@
+--
+FIRST RUN:
+
+Matrix size: 512 x 512
+Block size:  16 x 16 = 256 threads per block
+
+Step 1: Matrices created on CPU RAM
+Step 2: Memory reserved on GPU VRAM
+Step 3: Matrices copied CPU -> GPU
+Step 4: Thread layout defined
+        Grid:    32 x 32 blocks
+        Block:   16 x 16 threads
+        Total:   262144 threads launched
+Step 5: Kernel done in 1.579 ms
+Step 6: Result copied GPU -> CPU
+
+C[0][0] = 9942.0  (sanity check, just to confirm it ran)
+Step 7: Memory freed. Done.
+
+--
+SECOND RUN:
+
+Matrix size: 512 x 512
+Block size:  16 x 16 = 256 threads per block
+
+Step 1: Matrices created on CPU RAM
+Step 2: Memory reserved on GPU VRAM
+Step 3: Matrices copied CPU -> GPU
+Step 4: Thread layout defined
+        Grid:    32 x 32 blocks
+        Block:   16 x 16 threads
+        Total:   262144 threads launched
+Step 5: Kernel done in 1.577 ms
+Step 6: Result copied GPU -> CPU
+
+C[0][0] = 9942.0  (sanity check, just to confirm it ran)
+Step 7: Memory freed. Done.
