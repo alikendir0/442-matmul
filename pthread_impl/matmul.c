@@ -29,7 +29,7 @@ void* matmul_kernel(void* arg) {
             C[i * N + j] = sum; // Local accumulation : Aim is minimize writes to main memory and prevent bandwidth bottlenecks.
         }
     }
-    pthread_exit(NULL);
+    return NULL;
 }
 
 int main(int argc, char* argv[]) {
@@ -59,17 +59,24 @@ int main(int argc, char* argv[]) {
         struct timespec start, end;
 
         // --- TIMER START ---
-        // Strictly measures thread creation, kernel execution, and join synchronization.
         clock_gettime(CLOCK_MONOTONIC, &start);
 
-        for (int i = 0; i < num_threads; i++) {
-            args[i].thread_id = i;
-            pthread_create(&threads[i], NULL, matmul_kernel, &args[i]);
-        }
+        if (num_threads == 1) {
+            // Single-thread: run kernel directly without pthread overhead.
+            // This gives a fair serial baseline — just pure computation time,
+            // analogous to how CUDA excludes context initialization.
+            args[0].thread_id = 0;
+            matmul_kernel(&args[0]);
+        } else {
+            for (int i = 0; i < num_threads; i++) {
+                args[i].thread_id = i;
+                pthread_create(&threads[i], NULL, matmul_kernel, &args[i]);
+            }
 
-        // Barrier synchronization : The main thread waits for all worker threads to complete their execution.
-        for (int i = 0; i < num_threads; i++) {
-            pthread_join(threads[i], NULL);
+            // Barrier synchronization : The main thread waits for all worker threads to complete their execution.
+            for (int i = 0; i < num_threads; i++) {
+                pthread_join(threads[i], NULL);
+            }
         }
 
         // --- TIMER END ---
@@ -82,7 +89,7 @@ int main(int argc, char* argv[]) {
     double average_time = total_time / num_runs;
     
     // Console I/O is strictly excluded from the performance timer in order to prevent latency overhead.
-    printf("N: %d, Threads: %d, Avg Time (3 runs): %.6f s\n", N, num_threads, average_time);
+    printf("N: %d, Threads: %d, Avg Time (3 runs): %.9f s\n", N, num_threads, average_time);
 
     free(A); free(B); free(C);
     return 0;
